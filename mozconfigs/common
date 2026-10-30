@@ -1,0 +1,15 @@
+ac_add_options --enable-application=browser
+ac_add_options --enable-optimize
+ac_add_options --disable-debug
+ac_add_options --disable-tests
+ac_add_options --disable-crashreporter
+# Built-in updater, pointed at this repo's releases (AppUpdateURL policy is added in the workflow).
+# Our update packages are unsigned, so signature verification is off.
+ac_add_options --enable-updater
+ac_add_options --enable-unverified-updates
+export MAR_CHANNEL_ID=nightlyfox
+export ACCEPTED_MAR_CHANNEL_IDS=nightlyfox
+ac_add_options --with-ccache=sccache
+mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj
+mk_add_options AUTOCLOBBER=1
+export MOZ_UPDATE_CHANNEL=nightly

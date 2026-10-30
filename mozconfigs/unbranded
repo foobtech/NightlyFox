@@ -1,0 +1,2 @@
+# Generic "unofficial" branding: the intended route for third-party builds
+ac_add_options --with-branding=browser/branding/unofficial

@@ -1,0 +1,218 @@
+name: Build Nightly
+
+on:
+  schedule:
+    - cron: "30 23 * * *"   # once a day at 23:30 UTC: builds the newest upstream commit at that moment
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Build even if this upstream commit already has a release"
+        type: boolean
+        default: false
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  UPSTREAM_REPO: mozilla-firefox/firefox
+  UPSTREAM_BRANCH: main        # "main" is what used to be mozilla-central (Nightly)
+  KEEP_RELEASES: 14
+  MAR_CHANNEL_ID: nightlyfox
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.c.outputs.sha }}
+      short: ${{ steps.c.outputs.short }}
+      prev: ${{ steps.c.outputs.prev }}
+      build: ${{ steps.c.outputs.build }}
+    steps:
+      - id: c
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          sha=$(git ls-remote "https://github.com/$UPSTREAM_REPO" "refs/heads/$UPSTREAM_BRANCH" | cut -f1)
+          [ -n "$sha" ] || { echo "Could not read upstream commit"; exit 1; }
+          short=${sha:0:10}
+          build=true
+          if [ "$FORCE" != "true" ] && gh release list --repo "$GITHUB_REPOSITORY" --limit 200 \
+               --json tagName --jq '.[].tagName' | grep -q -- "-$short$"; then
+            build=false
+          fi
+          # upstream commit of the previous release (stored in its notes), used for the commit list
+          prev=""
+          last=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1 --json tagName --jq '.[0].tagName // empty')
+          if [ -n "$last" ]; then
+            prev=$(gh release view "$last" --repo "$GITHUB_REPOSITORY" --json body --jq .body \
+                   | grep -o 'upstream-sha: [0-9a-f]\{40\}' | head -1 | cut -d' ' -f2 || true)
+          fi
+          echo "upstream=$sha prev=$prev build=$build"
+          { echo "sha=$sha"; echo "short=$short"; echo "prev=$prev"; echo "build=$build"; } >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: check
+    if: needs.check.outputs.build == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [unbranded, branded]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 355
+    env:
+      VARIANT: ${{ matrix.variant }}
+      SCCACHE_GHA_ENABLED: "true"
+      MOZCONFIG: ${{ github.workspace }}/mozconfig
+      SHA: ${{ needs.check.outputs.sha }}
+      SHORT: ${{ needs.check.outputs.short }}
+      GH_TOKEN: ${{ github.token }}
+      LOG: ${{ github.workspace }}/build.log
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start (record time, publish status)
+        run: |
+          echo "START_EPOCH=$(date -u +%s)" >> "$GITHUB_ENV"
+          : > "$LOG"
+          export START_EPOCH=$(date -u +%s)
+          bash scripts/push_status.sh starting
+
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h /
+
+      - uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Fetch upstream source (exact commit)
+        run: |
+          mkdir src && cd src
+          git init -q
+          git remote add origin "https://github.com/$UPSTREAM_REPO"
+          git fetch --depth 1 origin "$SHA"
+          git checkout -q FETCH_HEAD
+
+      - name: Bootstrap build dependencies
+        working-directory: src
+        run: |
+          bash ../scripts/push_status.sh bootstrapping
+          ./mach --no-interactive bootstrap --application-choice browser 2>&1 | tee -a "$LOG"
+
+      - name: Write mozconfig (${{ matrix.variant }})
+        run: cat mozconfigs/common mozconfigs/${{ matrix.variant }} > "$MOZCONFIG"
+
+      - name: Build (compile)
+        working-directory: src
+        run: |
+          S="$GITHUB_WORKSPACE/scripts"
+          # refresh the README console image every 5 minutes while compiling
+          ( while true; do bash "$S/push_status.sh" compiling; sleep 300; done ) &
+          LOOP=$!
+          date -u +%s > "$RUNNER_TEMP/compile_start"
+          set +e
+          ./mach build 2>&1 | tee -a "$LOG"
+          rc=${PIPESTATUS[0]}
+          set -e
+          date -u +%s > "$RUNNER_TEMP/compile_end"
+          kill "$LOOP" 2>/dev/null || true
+          sccache --show-stats || true
+          exit "$rc"
+
+      - name: Package
+        working-directory: src
+        run: |
+          bash ../scripts/push_status.sh packaging
+          # point this build's updater at THIS repo's releases
+          mkdir -p obj/dist/bin/distribution
+          printf '{"policies":{"AppUpdateURL":"https://github.com/%s/releases/latest/download/update-%s-linux-x86_64.xml"}}\n' \
+            "$GITHUB_REPOSITORY" "$VARIANT" > obj/dist/bin/distribution/policies.json
+          ./mach package 2>&1 | tee -a "$LOG"
+          f=$(ls obj/dist/firefox-*.tar.* | head -n1)
+          ext="tar.${f##*.tar.}"
+          mkdir -p ../out
+          name="NightlyFox-${VARIANT}-linux-x86_64-${SHORT}.${ext}"
+          cp "$f" "../out/$name"
+          (cd ../out && sha256sum "$name" > "$name.sha256")
+
+      - name: Build update package (MAR)
+        continue-on-error: true   # if this breaks, you still get the normal tarball
+        working-directory: src
+        run: |
+          export MOZ_PRODUCT_VERSION=$(cat browser/config/version.txt)
+          MAR=$(find obj/dist/host/bin -name mar -type f | head -1)
+          if [ -z "$MAR" ]; then ./mach build modules/libmar; MAR=$(find obj/dist/host/bin -name mar -type f | head -1); fi
+          [ -n "$MAR" ] || { echo "mar tool not found"; exit 1; }
+          export MAR="$PWD/$MAR"
+          bash tools/update-packaging/make_full_update.sh \
+            "$GITHUB_WORKSPACE/out/NightlyFox-${VARIANT}-linux-x86_64-${SHORT}.complete.mar" \
+            "$PWD/obj/dist/firefox" firefox
+          ls -lh "$GITHUB_WORKSPACE/out"
+
+      - name: Write build info (timings)
+        working-directory: src
+        run: |
+          mar=$(cd ../out && ls *.mar 2>/dev/null | head -1 || true)
+          bid=$(grep -m1 '^BuildID=' obj/dist/bin/application.ini | cut -d= -f2)
+          printf '{"variant":"%s","started":%s,"compile_start":%s,"compile_end":%s,"finished":%s,"build_id":"%s","version":"%s","mar":"%s"}\n' \
+            "$VARIANT" "$START_EPOCH" "$(cat "$RUNNER_TEMP/compile_start")" "$(cat "$RUNNER_TEMP/compile_end")" \
+            "$(date -u +%s)" "$bid" "$(cat browser/config/version.txt)" "$mar" > "../out/info-${VARIANT}.json"
+          cat "../out/info-${VARIANT}.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.variant }}
+          path: out/*
+          if-no-files-found: error
+
+      - name: Final status
+        if: always()
+        run: bash scripts/push_status.sh "${{ job.status }}"
+
+  release:
+    needs: [check, build]
+    if: ${{ !cancelled() && needs.check.outputs.build == 'true' && needs.build.result != 'skipped' }}
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SHA: ${{ needs.check.outputs.sha }}
+      SHORT: ${{ needs.check.outputs.short }}
+      PREV: ${{ needs.check.outputs.prev }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: build-*
+          path: out
+          merge-multiple: true
+
+      - name: Release notes + update feeds
+        run: |
+          [ -n "$(ls -A out)" ] || { echo "No build artifacts"; exit 1; }
+          tag="nightly-$(date -u +%Y%m%d-%H%M)-$SHORT"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          mkdir meta
+          mv out/info-*.json meta/
+          python3 scripts/make_release.py --tag "$tag" --out out --meta meta --notes notes.md
+
+      - name: Publish release
+        run: |
+          gh release create "$TAG" out/* --repo "$GITHUB_REPOSITORY" \
+            --title "Nightly $(date -u '+%Y-%m-%d %H:%M') UTC ($SHORT)" \
+            --notes-file notes.md
+
+      - name: Prune old releases
+        run: |
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName --jq '.[].tagName' \
+            | grep '^nightly-' | tail -n +$((KEEP_RELEASES + 1)) \
+            | while read -r t; do gh release delete "$t" --cleanup-tag --yes --repo "$GITHUB_REPOSITORY"; done
