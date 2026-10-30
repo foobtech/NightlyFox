@@ -115,8 +115,8 @@ jobs:
         working-directory: src
         run: |
           S="$GITHUB_WORKSPACE/scripts"
-          # refresh the README console image every 5 minutes while compiling
-          ( while true; do bash "$S/push_status.sh" compiling; sleep 300; done ) &
+          # refresh the README console image every minute while compiling
+          ( while true; do bash "$S/push_status.sh" compiling; sleep 60; done ) &
           LOOP=$!
           date -u +%s > "$RUNNER_TEMP/compile_start"
           set +e

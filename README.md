@@ -14,8 +14,8 @@ that moment, for both variants. Each release lists the upstream commits since
 the previous build and when compiling started, finished and how long it took.
 
 ## Live build console
-Refreshed every ~5 minutes while a build is running (GitHub caches images, so it
-can lag a little). When idle it shows the result of the last build.
+Updated every minute while a build is running. GitHub caches README images for
+about 5 minutes, so what you see can lag by that much. When idle it shows the result of the last build.
 
 **unbranded**
 ![unbranded console](https://raw.githubusercontent.com/foobtech/NightlyFox/status-unbranded/console.svg)
