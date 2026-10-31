@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="392" viewBox="0 0 900 392" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12">
+<rect width="900" height="392" rx="8" fill="#0d1117"/>
+<rect width="900" height="34" rx="8" fill="#161b22"/><rect y="20" width="900" height="14" fill="#161b22"/>
+<circle cx="18" cy="17" r="5" fill="#f85149"/><circle cx="38" cy="17" r="5" fill="#d29922"/><circle cx="58" cy="17" r="5" fill="#3fb950"/>
+<text x="450" y="21" fill="#8b949e" text-anchor="middle">nightlyfox@actions: firedoge-linux-aarch64</text>
+<text x="16" y="60" font-size="14" font-weight="bold" fill="#8b949e" xml:space="preserve">● CANCELLED</text>
+<text x="16" y="78" fill="#8b949e" xml:space="preserve">commit 9fcf3a1690  ·  total 1h 18m 43s  ·  updated 2026-10-31 07:42:30 UTC</text>
+<text x="16" y="104" fill="#c9d1d9" xml:space="preserve">Streaming resource usage profile to: /home/runner/work/NightlyFox/NightlyFox/src/obj/.mozbuild/logs/build/p…</text>
+<text x="16" y="120" fill="#c9d1d9" xml:space="preserve"> 0:00.43 Parallelism determined by memory: using 4 jobs for 4 cores based on 15.6 GiB RAM and estimated job…</text>
+<text x="16" y="136" fill="#c9d1d9" xml:space="preserve"> 0:00.43 /usr/bin/gmake -C . -j4 -s -w package</text>
+<text x="16" y="152" fill="#c9d1d9" xml:space="preserve"> 0:00.47 gmake: Entering directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj&#x27;</text>
+<text x="16" y="168" fill="#c9d1d9" xml:space="preserve"> 0:00.48 gmake[1]: Entering directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/installer&#x27;</text>
+<text x="16" y="184" fill="#c9d1d9" xml:space="preserve"> 0:00.49 gmake[2]: Entering directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/installer&#x27;</text>
+<text x="16" y="200" fill="#c9d1d9" xml:space="preserve"> 0:00.49 gmake[3]: Entering directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/installer&#x27;</text>
+<text x="16" y="216" fill="#c9d1d9" xml:space="preserve"> 0:00.49 BUILDSTATUS@browser/installer START_file_generate multilocale.txt</text>
+<text x="16" y="232" fill="#c9d1d9" xml:space="preserve"> 0:00.49 BUILDSTATUS@browser/installer START_locale_manifest --output locale-manifest.in --base-path @RESPA…</text>
+<text x="16" y="248" fill="#c9d1d9" xml:space="preserve"> 0:00.49 BUILDSTATUS@browser/installer START_make_sourcestamp_file --output ../../dist//firefox-161.0a1.en-…</text>
+<text x="16" y="264" fill="#c9d1d9" xml:space="preserve"> 0:00.54 BUILDSTATUS@browser/installer END_locale_manifest --output locale-manifest.in --base-path @RESPATH…</text>
+<text x="16" y="280" fill="#c9d1d9" xml:space="preserve"> 0:00.61 BUILDSTATUS@browser/installer END_file_generate multilocale.txt</text>
+<text x="16" y="296" fill="#c9d1d9" xml:space="preserve"> 0:00.61 BUILDSTATUS@browser/installer END_make_sourcestamp_file --output ../../dist//firefox-161.0a1.en-US…</text>
+<text x="16" y="312" fill="#c9d1d9" xml:space="preserve"> 0:29.01 Generating XPT artifacts archive (firefox-161.0a1.en-US.linux-aarch64.xpt_artifacts.zip)</text>
+<text x="16" y="328" fill="#c9d1d9" xml:space="preserve"> 0:29.01 BUILDSTATUS@browser/installer START_zip firefox-161.0a1.en-US.linux-aarch64.xpt_artifacts.zip</text>
+<text x="16" y="344" fill="#c9d1d9" xml:space="preserve"> 0:29.26 BUILDSTATUS@browser/installer END_zip firefox-161.0a1.en-US.linux-aarch64.xpt_artifacts.zip</text>
+<text x="16" y="360" fill="#c9d1d9" xml:space="preserve"> 0:29.26 Compressing...</text>
+<text x="16" y="376" fill="#c9d1d9" xml:space="preserve"> 0:29.26 BUILDSTATUS@browser/installer START_package XZ</text>
+</svg>
