@@ -9,6 +9,14 @@ on:
         description: "Build even if this upstream commit already has a release"
         type: boolean
         default: false
+      platforms:
+        description: "Platforms: comma list or 'all'. Empty = repo variable PLATFORMS, else defaults"
+        type: string
+        default: ""
+      brandings:
+        description: "Brandings: comma list or 'all'. Empty = repo variable BRANDINGS, else defaults"
+        type: string
+        default: ""
 
 concurrency:
   group: nightly
@@ -34,8 +42,11 @@ jobs:
       sha: ${{ steps.c.outputs.sha }}
       short: ${{ steps.c.outputs.short }}
       prev: ${{ steps.c.outputs.prev }}
-      build: ${{ steps.c.outputs.build }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+      build: ${{ steps.c.outputs.build == 'true' && steps.plan.outputs.count != '0' }}
     steps:
+      - uses: actions/checkout@v4
+
       - id: c
         env:
           GH_TOKEN: ${{ github.token }}
@@ -49,7 +60,6 @@ jobs:
                --json tagName --jq '.[].tagName' | grep -q -- "-$short$"; then
             build=false
           fi
-          # upstream commit of the previous release (stored in its notes), used for the commit list
           prev=""
           last=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1 --json tagName --jq '.[0].tagName // empty')
           if [ -n "$last" ]; then
@@ -59,17 +69,25 @@ jobs:
           echo "upstream=$sha prev=$prev build=$build"
           { echo "sha=$sha"; echo "short=$short"; echo "prev=$prev"; echo "build=$build"; } >> "$GITHUB_OUTPUT"
 
+      - id: plan
+        env:
+          SEL_PLATFORMS: ${{ inputs.platforms || vars.PLATFORMS }}
+          SEL_BRANDINGS: ${{ inputs.brandings || vars.BRANDINGS }}
+        run: python3 scripts/plan.py
+
   build:
+    name: ${{ matrix.platform }} / ${{ matrix.branding }}
     needs: check
     if: needs.check.outputs.build == 'true'
     strategy:
       fail-fast: false
-      matrix:
-        variant: [unbranded, branded]
-    runs-on: ubuntu-24.04
+      matrix: ${{ fromJSON(needs.check.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 355
     env:
-      VARIANT: ${{ matrix.variant }}
+      BRANDING: ${{ matrix.branding }}
+      PLATFORM: ${{ matrix.platform }}
+      VARIANT: ${{ matrix.branding }}-${{ matrix.platform }}
       SCCACHE_GHA_ENABLED: "true"
       MOZCONFIG: ${{ github.workspace }}/mozconfig
       SHA: ${{ needs.check.outputs.sha }}
@@ -102,8 +120,14 @@ jobs:
           git fetch --depth 1 origin "$SHA"
           git checkout -q FETCH_HEAD
 
-      - name: Write mozconfig (${{ matrix.variant }})
-        run: cat mozconfigs/common mozconfigs/${{ matrix.variant }} > "$MOZCONFIG"
+      - name: Apply branding (${{ matrix.branding }})
+        run: bash scripts/apply_branding.sh "$BRANDING"
+
+      - name: Write mozconfig
+        run: |
+          cat mozconfigs/common "mozconfigs/branding-$BRANDING" > "$MOZCONFIG"
+          if [ -f "mozconfigs/platform-$PLATFORM" ]; then cat "mozconfigs/platform-$PLATFORM" >> "$MOZCONFIG"; fi
+          cat "$MOZCONFIG"
 
       - name: Bootstrap build dependencies
         working-directory: src
@@ -134,13 +158,13 @@ jobs:
           bash ../scripts/push_status.sh packaging
           # point this build's updater at THIS repo's releases
           mkdir -p obj/dist/bin/distribution
-          printf '{"policies":{"AppUpdateURL":"https://github.com/%s/releases/latest/download/update-%s-linux-x86_64.xml"}}\n' \
-            "$GITHUB_REPOSITORY" "$VARIANT" > obj/dist/bin/distribution/policies.json
+          printf '{"policies":{"AppUpdateURL":"https://github.com/%s/releases/latest/download/update-%s-%s.xml"}}\n' \
+            "$GITHUB_REPOSITORY" "$BRANDING" "$PLATFORM" > obj/dist/bin/distribution/policies.json
           ./mach package 2>&1 | tee -a "$LOG"
           f=$(ls obj/dist/firefox-*.tar.* | head -n1)
           ext="tar.${f##*.tar.}"
           mkdir -p ../out
-          name="NightlyFox-${VARIANT}-linux-x86_64-${SHORT}.${ext}"
+          name="NightlyFox-${BRANDING}-${PLATFORM}-${SHORT}.${ext}"
           cp "$f" "../out/$name"
           (cd ../out && sha256sum "$name" > "$name.sha256")
 
@@ -154,7 +178,7 @@ jobs:
           [ -n "$MAR" ] || { echo "mar tool not found"; exit 1; }
           export MAR="$PWD/$MAR"
           bash tools/update-packaging/make_full_update.sh \
-            "$GITHUB_WORKSPACE/out/NightlyFox-${VARIANT}-linux-x86_64-${SHORT}.complete.mar" \
+            "$GITHUB_WORKSPACE/out/NightlyFox-${BRANDING}-${PLATFORM}-${SHORT}.complete.mar" \
             "$PWD/obj/dist/firefox" firefox
           ls -lh "$GITHUB_WORKSPACE/out"
 
@@ -163,14 +187,14 @@ jobs:
         run: |
           mar=$(cd ../out && ls *.mar 2>/dev/null | head -1 || true)
           bid=$(grep -m1 '^BuildID=' obj/dist/bin/application.ini | cut -d= -f2)
-          printf '{"variant":"%s","started":%s,"compile_start":%s,"compile_end":%s,"finished":%s,"build_id":"%s","version":"%s","mar":"%s"}\n' \
-            "$VARIANT" "$START_EPOCH" "$(cat "$RUNNER_TEMP/compile_start")" "$(cat "$RUNNER_TEMP/compile_end")" \
+          printf '{"branding":"%s","platform":"%s","started":%s,"compile_start":%s,"compile_end":%s,"finished":%s,"build_id":"%s","version":"%s","mar":"%s"}\n' \
+            "$BRANDING" "$PLATFORM" "$START_EPOCH" "$(cat "$RUNNER_TEMP/compile_start")" "$(cat "$RUNNER_TEMP/compile_end")" \
             "$(date -u +%s)" "$bid" "$(cat browser/config/version.txt)" "$mar" > "../out/info-${VARIANT}.json"
           cat "../out/info-${VARIANT}.json"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.variant }}
+          name: build-${{ matrix.branding }}-${{ matrix.platform }}
           path: out/*
           if-no-files-found: error
 

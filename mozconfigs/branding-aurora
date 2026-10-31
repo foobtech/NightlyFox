@@ -1,0 +1,2 @@
+# Firefox Developer Edition ("Aurora") name + logo (Mozilla trademarks, see README)
+ac_add_options --with-branding=browser/branding/aurora

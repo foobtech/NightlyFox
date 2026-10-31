@@ -47,7 +47,7 @@ def main():
                f'    <patch type="complete" URL="{url}" hashFunction="sha512" '
                f'hashValue="{hashlib.sha512(data).hexdigest()}" size="{len(data)}"/>\n'
                f'  </update>\n</updates>\n')
-        open(os.path.join(a.out, f"update-{i['variant']}-linux-x86_64.xml"), "w").write(xml)
+        open(os.path.join(a.out, f"update-{i['branding']}-{i['platform']}.xml"), "w").write(xml)
 
     # ---- commits ----
     if prev:
@@ -63,10 +63,10 @@ def main():
     if infos:
         md += [f"Version `{infos[0]['version']}`  ·  upstream branch `{branch}`", ""]
     md += ["### Build times (UTC)", "",
-           "| Variant | Job started | Compile started | Compile finished | Compile time | Total job time |",
-           "|---|---|---|---|---|---|"]
-    for i in infos:
-        md.append(f"| {i['variant']} | {t(i['started'])} | {t(i['compile_start'])} | {t(i['compile_end'])} | "
+           "| Platform | Branding | Job started | Compile started | Compile finished | Compile time | Total job time |",
+           "|---|---|---|---|---|---|---|"]
+    for i in sorted(infos, key=lambda x: (x["platform"], x["branding"])):
+        md.append(f"| {i['platform']} | {i['branding']} | {t(i['started'])} | {t(i['compile_start'])} | {t(i['compile_end'])} | "
                   f"**{dur(i['compile_end'] - i['compile_start'])}** | {dur(i['finished'] - i['started'])} |")
     md.append("")
     if rows is None:

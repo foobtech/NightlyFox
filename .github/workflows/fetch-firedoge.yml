@@ -1,0 +1,30 @@
+name: Fetch FireDoge branding
+
+on:
+  workflow_dispatch:
+    inputs:
+      add_commit:
+        description: "Optional: gecko-dev commit that ADDED the doge logo (auto-detected if empty)"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find and copy the last commit with the doge branding
+        env:
+          ADD_COMMIT: ${{ inputs.add_commit }}
+        run: bash scripts/find_firedoge.sh
+      - name: Commit result
+        run: |
+          git config user.name nightlyfox-bot
+          git config user.email nightlyfox-bot@users.noreply.github.com
+          git add branding/firedoge
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Add FireDoge branding assets"
+          git push

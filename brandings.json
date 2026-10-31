@@ -1,0 +1,7 @@
+{
+  "unofficial": {"default": true},
+  "nightly":    {"default": true},
+  "aurora":     {"default": true},
+  "official":   {"default": true},
+  "firedoge":   {"default": true, "needs_dir": "branding/firedoge"}
+}
