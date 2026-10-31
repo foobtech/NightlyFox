@@ -3,8 +3,12 @@ name: Fetch FireDoge branding
 on:
   workflow_dispatch:
     inputs:
+      removal_commit:
+        description: "Optional: gecko-dev commit that REMOVED the doge logo (auto-detected if empty)"
+        type: string
+        default: ""
       add_commit:
-        description: "Optional: gecko-dev commit that ADDED the doge logo (auto-detected if empty)"
+        description: "Optional: gecko-dev commit that ADDED the doge logo (only if you don't know the removal)"
         type: string
         default: ""
 
@@ -19,6 +23,7 @@ jobs:
       - name: Find and copy the last commit with the doge branding
         env:
           ADD_COMMIT: ${{ inputs.add_commit }}
+          REMOVAL_COMMIT: ${{ inputs.removal_commit }}
         run: bash scripts/find_firedoge.sh
       - name: Commit result
         run: |
