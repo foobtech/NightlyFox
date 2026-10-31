@@ -71,6 +71,10 @@ jobs:
                    | grep -o 'upstream-sha: [0-9a-f]\{40\}' | head -1 | cut -d' ' -f2 || true)
           fi
           echo "upstream=$sha prev=$prev build=$build"
+          if [ "$build" = "false" ]; then
+            echo "### Nothing to build" >> "$GITHUB_STEP_SUMMARY"
+            echo "Upstream commit \`$short\` already has a release. Tick **force** when you run the workflow to rebuild it." >> "$GITHUB_STEP_SUMMARY"
+          fi
           { echo "sha=$sha"; echo "short=$short"; echo "prev=$prev"; echo "build=$build"; } >> "$GITHUB_OUTPUT"
 
       - id: plan

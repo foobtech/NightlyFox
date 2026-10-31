@@ -72,6 +72,25 @@ about 5 minutes, so what you see can lag by that much.
 
 </details>
 
+<details><summary><b>windows-x86_64</b> (experimental)</summary>
+
+**unofficial**  
+![unofficial windows-x86_64](https://raw.githubusercontent.com/foobtech/NightlyFox/status-unofficial-windows-x86_64/console.svg)
+
+**nightly**  
+![nightly windows-x86_64](https://raw.githubusercontent.com/foobtech/NightlyFox/status-nightly-windows-x86_64/console.svg)
+
+**aurora**  
+![aurora windows-x86_64](https://raw.githubusercontent.com/foobtech/NightlyFox/status-aurora-windows-x86_64/console.svg)
+
+**official**  
+![official windows-x86_64](https://raw.githubusercontent.com/foobtech/NightlyFox/status-official-windows-x86_64/console.svg)
+
+**firedoge**  
+![firedoge windows-x86_64](https://raw.githubusercontent.com/foobtech/NightlyFox/status-firedoge-windows-x86_64/console.svg)
+
+</details>
+
 ## Downloading
 Releases tab -> newest `nightly-...` release -> grab the `.tar.xz` for your
 platform and branding, then:
