@@ -144,9 +144,10 @@ jobs:
           tar --zstd -xf wine.tar.zst -C "$HOME/win-cross"
           rm wine.tar.zst
           cd src
-          vs=$(ls build/vs/vs*.yaml | sort -V | tail -1)
+          vs=$(ls build/vs/vs*.yaml | grep -v aarch64 | sort -V | tail -1)
           echo "Using $vs"
-          ./mach python --virtualenv build taskcluster/scripts/misc/get_vs.py "$vs" "$HOME/win-cross/vs"
+          # MOZCONFIG isn't written yet at this point, so hide it from mach
+          env -u MOZCONFIG ./mach python --virtualenv build taskcluster/scripts/misc/get_vs.py "$vs" "$HOME/win-cross/vs"
           chmod -R +x "$HOME/win-cross/vs" || true
           redist=$(ls -d "$HOME"/win-cross/vs/VC/Redist/MSVC/*/x64/Microsoft.VC*.CRT 2>/dev/null | head -1 || true)
           echo "redist: $redist"

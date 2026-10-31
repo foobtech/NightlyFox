@@ -4,7 +4,7 @@
 here="$(cd "$(dirname "$0")" && pwd)"
 state="${1:-compiling}"
 tmp="$(mktemp -d)"
-python3 "$here/console.py" --state "$state" --variant "${VARIANT:-?}" --commit "${SHORT:-}" \
+python3 "$here/console.py" --state "$state" --variant "${VARIANT:-?}" --label "${FLAVOR:-?} · ${PLATFORM:-?}" --commit "${SHORT:-}" \
   --log "${LOG:-/dev/null}" --start "${START_EPOCH:-0}" --out "$tmp/console.svg" || exit 0
 cd "$tmp" || exit 0
 git init -q -b "status-${VARIANT}" \
