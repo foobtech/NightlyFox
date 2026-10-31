@@ -17,6 +17,10 @@ on:
         description: "Brandings: comma list or 'all'. Empty = repo variable BRANDINGS, else defaults"
         type: string
         default: ""
+      onboarding:
+        description: "First-run onboarding: off, on, or both. Empty = repo variable ONBOARDING, else off"
+        type: string
+        default: ""
 
 concurrency:
   group: nightly
@@ -73,10 +77,11 @@ jobs:
         env:
           SEL_PLATFORMS: ${{ inputs.platforms || vars.PLATFORMS }}
           SEL_BRANDINGS: ${{ inputs.brandings || vars.BRANDINGS }}
+          SEL_ONBOARDING: ${{ inputs.onboarding || vars.ONBOARDING }}
         run: python3 scripts/plan.py
 
   build:
-    name: ${{ matrix.platform }} / ${{ matrix.branding }}
+    name: ${{ matrix.platform }} / ${{ matrix.flavor }}
     needs: check
     if: needs.check.outputs.build == 'true'
     strategy:
@@ -86,8 +91,10 @@ jobs:
     timeout-minutes: 355
     env:
       BRANDING: ${{ matrix.branding }}
+      FLAVOR: ${{ matrix.flavor }}
+      ONBOARDING: ${{ matrix.onboarding }}
       PLATFORM: ${{ matrix.platform }}
-      VARIANT: ${{ matrix.branding }}-${{ matrix.platform }}
+      VARIANT: ${{ matrix.flavor }}-${{ matrix.platform }}
       SCCACHE_GHA_ENABLED: "true"
       MOZCONFIG: ${{ github.workspace }}/mozconfig
       SHA: ${{ needs.check.outputs.sha }}
@@ -122,6 +129,9 @@ jobs:
 
       - name: Apply branding (${{ matrix.branding }})
         run: bash scripts/apply_branding.sh "$BRANDING"
+
+      - name: Apply onboarding setting (${{ matrix.onboarding }})
+        run: bash scripts/apply_onboarding.sh "$ONBOARDING" "$BRANDING"
 
       - name: Write mozconfig
         run: |
@@ -159,12 +169,12 @@ jobs:
           # point this build's updater at THIS repo's releases
           mkdir -p obj/dist/bin/distribution
           printf '{"policies":{"AppUpdateURL":"https://github.com/%s/releases/latest/download/update-%s-%s.xml"}}\n' \
-            "$GITHUB_REPOSITORY" "$BRANDING" "$PLATFORM" > obj/dist/bin/distribution/policies.json
+            "$GITHUB_REPOSITORY" "$FLAVOR" "$PLATFORM" > obj/dist/bin/distribution/policies.json
           ./mach package 2>&1 | tee -a "$LOG"
           f=$(ls obj/dist/firefox-*.tar.* | head -n1)
           ext="tar.${f##*.tar.}"
           mkdir -p ../out
-          name="NightlyFox-${BRANDING}-${PLATFORM}-${SHORT}.${ext}"
+          name="NightlyFox-${FLAVOR}-${PLATFORM}-${SHORT}.${ext}"
           cp "$f" "../out/$name"
           (cd ../out && sha256sum "$name" > "$name.sha256")
 
@@ -178,7 +188,7 @@ jobs:
           [ -n "$MAR" ] || { echo "mar tool not found"; exit 1; }
           export MAR="$PWD/$MAR"
           bash tools/update-packaging/make_full_update.sh \
-            "$GITHUB_WORKSPACE/out/NightlyFox-${BRANDING}-${PLATFORM}-${SHORT}.complete.mar" \
+            "$GITHUB_WORKSPACE/out/NightlyFox-${FLAVOR}-${PLATFORM}-${SHORT}.complete.mar" \
             "$PWD/obj/dist/firefox" firefox
           ls -lh "$GITHUB_WORKSPACE/out"
 
@@ -188,13 +198,13 @@ jobs:
           mar=$(cd ../out && ls *.mar 2>/dev/null | head -1 || true)
           bid=$(grep -m1 '^BuildID=' obj/dist/bin/application.ini | cut -d= -f2)
           printf '{"branding":"%s","platform":"%s","started":%s,"compile_start":%s,"compile_end":%s,"finished":%s,"build_id":"%s","version":"%s","mar":"%s"}\n' \
-            "$BRANDING" "$PLATFORM" "$START_EPOCH" "$(cat "$RUNNER_TEMP/compile_start")" "$(cat "$RUNNER_TEMP/compile_end")" \
+            "$FLAVOR" "$PLATFORM" "$START_EPOCH" "$(cat "$RUNNER_TEMP/compile_start")" "$(cat "$RUNNER_TEMP/compile_end")" \
             "$(date -u +%s)" "$bid" "$(cat browser/config/version.txt)" "$mar" > "../out/info-${VARIANT}.json"
           cat "../out/info-${VARIANT}.json"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.branding }}-${{ matrix.platform }}
+          name: build-${{ matrix.flavor }}-${{ matrix.platform }}
           path: out/*
           if-no-files-found: error
 

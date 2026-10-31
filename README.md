@@ -15,8 +15,14 @@ download from Mozilla.
 | `official` | Release Firefox name + logo |
 | `firedoge` | Joke: Nightly branding with the 2021 FireDoge images |
 
+## Onboarding builds
+Builds can also include Firefox's first-run onboarding (`about:welcome`). Those
+files end in `-onboarding`, e.g. `NightlyFox-unofficial-onboarding-linux-x86_64-...`.
+Without it, `unofficial` shows no welcome page, and `nightly`/`aurora` open a
+mozilla.org page. Onboarding contacts Mozilla's servers.
+
 ## Platforms
-Linux x86_64 and Linux aarch64. Windows and macOS are not supported yet.
+Linux x86_64 and Linux aarch64. Windows, macOS and Android are planned.
 
 A build runs once a day at 23:30 UTC and compiles the newest upstream commit at
 that moment, for every enabled platform and branding. Each release lists the
