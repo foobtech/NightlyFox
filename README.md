@@ -22,7 +22,8 @@ Without it, `unofficial` shows no welcome page, and `nightly`/`aurora` open a
 mozilla.org page. Onboarding contacts Mozilla's servers.
 
 ## Platforms
-Linux x86_64 and Linux aarch64. Windows, macOS and Android are planned.
+Linux x86_64 and Linux aarch64. Windows x64 is experimental (zip only, no auto-update, off by
+default). macOS and Android are planned.
 
 A build runs once a day at 23:30 UTC and compiles the newest upstream commit at
 that moment, for every enabled platform and branding. Each release lists the
@@ -77,6 +78,9 @@ platform and branding, then:
 
     tar xf NightlyFox-unofficial-linux-x86_64-<hash>.tar.xz
     ./firefox/firefox
+
+On Windows, extract the `.zip` and run `firefox.exe`. Windows may show a
+SmartScreen warning because the build isn't signed.
 
 ## Updating
 The builds check this repo's releases for updates (Settings -> General ->

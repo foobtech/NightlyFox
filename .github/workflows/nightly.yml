@@ -94,6 +94,7 @@ jobs:
       FLAVOR: ${{ matrix.flavor }}
       ONBOARDING: ${{ matrix.onboarding }}
       PLATFORM: ${{ matrix.platform }}
+      OS: ${{ matrix.os }}
       VARIANT: ${{ matrix.flavor }}-${{ matrix.platform }}
       SCCACHE_GHA_ENABLED: "true"
       MOZCONFIG: ${{ github.workspace }}/mozconfig
@@ -133,10 +134,31 @@ jobs:
       - name: Apply onboarding setting (${{ matrix.onboarding }})
         run: bash scripts/apply_onboarding.sh "$ONBOARDING" "$BRANDING"
 
+      - name: Prepare Windows cross-build toolchains
+        if: matrix.os == 'windows'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y msitools cabextract p7zip-full zstd lld llvm ninja-build
+          mkdir -p "$HOME/win-cross"
+          curl -fL --retry 5 -o wine.tar.zst "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.cache.level-3.toolchains.v3.linux64-wine.latest/artifacts/public/build/wine.tar.zst"
+          tar --zstd -xf wine.tar.zst -C "$HOME/win-cross"
+          rm wine.tar.zst
+          cd src
+          vs=$(ls build/vs/vs*.yaml | sort -V | tail -1)
+          echo "Using $vs"
+          ./mach python --virtualenv build taskcluster/scripts/misc/get_vs.py "$vs" "$HOME/win-cross/vs"
+          chmod -R +x "$HOME/win-cross/vs" || true
+          redist=$(ls -d "$HOME"/win-cross/vs/VC/Redist/MSVC/*/x64/Microsoft.VC*.CRT 2>/dev/null | head -1 || true)
+          echo "redist: $redist"
+          echo "export WIN32_REDIST_DIR=\"$redist\"" > "$RUNNER_TEMP/win.mozconfig"
+          ls "$HOME/win-cross" "$HOME/win-cross/wine" || true
+
       - name: Write mozconfig
         run: |
           cat mozconfigs/common "mozconfigs/branding-$BRANDING" > "$MOZCONFIG"
+          if [ "$OS" = "linux" ]; then cat mozconfigs/updater >> "$MOZCONFIG"; fi
           if [ -f "mozconfigs/platform-$PLATFORM" ]; then cat "mozconfigs/platform-$PLATFORM" >> "$MOZCONFIG"; fi
+          if [ -f "$RUNNER_TEMP/win.mozconfig" ]; then cat "$RUNNER_TEMP/win.mozconfig" >> "$MOZCONFIG"; fi
           cat "$MOZCONFIG"
 
       - name: Bootstrap build dependencies
@@ -144,6 +166,16 @@ jobs:
         run: |
           bash ../scripts/push_status.sh bootstrapping
           ./mach --no-interactive bootstrap --application-choice browser 2>&1 | tee -a "$LOG"
+
+      - name: Windows post-bootstrap (clang runtime libs, Rust target)
+        if: matrix.os == 'windows'
+        working-directory: src
+        run: |
+          clangdir=$(ls -d "$HOME"/.mozbuild/clang/lib/clang/*/lib/windows | head -1)
+          echo "export LIB=\"$clangdir\"" >> "$MOZCONFIG"
+          if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
+          if command -v rustup >/dev/null; then rustup target add x86_64-pc-windows-msvc; fi
+          tail -5 "$MOZCONFIG"
 
       - name: Build (compile)
         working-directory: src
@@ -166,19 +198,25 @@ jobs:
         working-directory: src
         run: |
           bash ../scripts/push_status.sh packaging
-          # point this build's updater at THIS repo's releases
-          mkdir -p obj/dist/bin/distribution
-          printf '{"policies":{"AppUpdateURL":"https://github.com/%s/releases/latest/download/update-%s-%s.xml"}}\n' \
-            "$GITHUB_REPOSITORY" "$FLAVOR" "$PLATFORM" > obj/dist/bin/distribution/policies.json
-          ./mach package 2>&1 | tee -a "$LOG"
-          f=$(ls obj/dist/firefox-*.tar.* | head -n1)
-          ext="tar.${f##*.tar.}"
           mkdir -p ../out
+          if [ "$OS" = "linux" ]; then
+            # point this build's updater at THIS repo's releases
+            mkdir -p obj/dist/bin/distribution
+            printf '{"policies":{"AppUpdateURL":"https://github.com/%s/releases/latest/download/update-%s-%s.xml"}}\n' \
+              "$GITHUB_REPOSITORY" "$FLAVOR" "$PLATFORM" > obj/dist/bin/distribution/policies.json
+          fi
+          ./mach package 2>&1 | tee -a "$LOG"
+          if [ "$OS" = "windows" ]; then
+            f=$(ls obj/dist/firefox-*.zip | grep -v -e crashreporter -e jsshell -e tests -e gtest | head -n1); ext="zip"
+          else
+            f=$(ls obj/dist/firefox-*.tar.* | head -n1); ext="tar.${f##*.tar.}"
+          fi
           name="NightlyFox-${FLAVOR}-${PLATFORM}-${SHORT}.${ext}"
           cp "$f" "../out/$name"
           (cd ../out && sha256sum "$name" > "$name.sha256")
 
       - name: Build update package (MAR)
+        if: matrix.os == 'linux'
         continue-on-error: true   # if this breaks, you still get the normal tarball
         working-directory: src
         run: |

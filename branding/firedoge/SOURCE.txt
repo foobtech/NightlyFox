@@ -1,3 +1,0 @@
-source: https://github.com/mozilla/gecko-dev/tree/c2e482bffeb3cf91daf3c5c1ed4c815048c29dfd/browser/branding/nightly
-removal-commit: e65a94c27147b09c770bff8e836c68df4a0a9835
-add-commit: 

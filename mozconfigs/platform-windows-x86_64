@@ -1,0 +1,7 @@
+# Windows x64, cross-compiled on Linux (toolchains are fetched by the workflow into ~/win-cross)
+ac_add_options --target=x86_64-pc-windows-msvc
+ac_add_options --disable-updater
+export WINSYSROOT="$HOME/win-cross/vs"
+export WINE="$HOME/win-cross/wine/bin/wine"
+export WINEDEBUG=-all
+export CROSS_BUILD=1

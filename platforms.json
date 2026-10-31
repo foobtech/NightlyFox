@@ -1,14 +1,60 @@
 {
-  "linux-x86_64":    {"runner": "ubuntu-24.04",     "arch": "x86_64",  "supported": true,  "default": true},
-  "linux-aarch64":   {"runner": "ubuntu-24.04-arm", "arch": "aarch64", "supported": true,  "default": true},
-  "windows-x86_64":  {"supported": false, "note": "planned next: Linux-hosted cross-build (wine + Visual Studio toolchain)"},
-  "android-aarch64": {"supported": false, "note": "planned: Fenix/GeckoView build, needs an APK signing key"},
-  "macos-aarch64":   {"supported": false, "note": "planned: Linux-hosted cross-build (cctools + macOS SDK + dmg tools)"},
-  "windows-aarch64": {"supported": false, "note": "planned: Windows cross-build for ARM64"},
-  "macos-x86_64":    {"supported": false, "note": "planned: macOS cross-build for Intel"},
-  "windows-x86":     {"supported": false, "note": "idea: 32-bit Windows"},
-  "android-armv7":   {"supported": false, "note": "idea: 32-bit ARM Android"},
-  "android-x86_64":  {"supported": false, "note": "idea: x86_64 Android"},
-  "linux-armv7":     {"supported": false, "note": "idea: 32-bit ARM Linux (cross-build)"},
-  "linux-i686":      {"supported": false, "note": "idea: 32-bit x86 Linux (cross-build)"}
+  "linux-x86_64": {
+    "runner": "ubuntu-24.04",
+    "arch": "x86_64",
+    "supported": true,
+    "default": true,
+    "os": "linux"
+  },
+  "linux-aarch64": {
+    "runner": "ubuntu-24.04-arm",
+    "arch": "aarch64",
+    "supported": true,
+    "default": true,
+    "os": "linux"
+  },
+  "windows-x86_64": {
+    "runner": "ubuntu-24.04",
+    "arch": "x86_64",
+    "os": "windows",
+    "supported": true,
+    "default": false,
+    "note": "experimental: cross-build from Linux, zip only, no auto-update"
+  },
+  "android-aarch64": {
+    "supported": false,
+    "note": "planned: Fenix/GeckoView build, needs an APK signing key"
+  },
+  "macos-aarch64": {
+    "supported": false,
+    "note": "planned: Linux-hosted cross-build (cctools + macOS SDK + dmg tools)"
+  },
+  "windows-aarch64": {
+    "supported": false,
+    "note": "planned: Windows cross-build for ARM64"
+  },
+  "macos-x86_64": {
+    "supported": false,
+    "note": "planned: macOS cross-build for Intel"
+  },
+  "windows-x86": {
+    "supported": false,
+    "note": "idea: 32-bit Windows"
+  },
+  "android-armv7": {
+    "supported": false,
+    "note": "idea: 32-bit ARM Android"
+  },
+  "android-x86_64": {
+    "supported": false,
+    "note": "idea: x86_64 Android"
+  },
+  "linux-armv7": {
+    "supported": false,
+    "note": "idea: 32-bit ARM Linux (cross-build)"
+  },
+  "linux-i686": {
+    "supported": false,
+    "note": "idea: 32-bit x86 Linux (cross-build)"
+  }
 }

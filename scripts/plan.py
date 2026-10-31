@@ -41,7 +41,7 @@ if ob not in ("off", "on", "both", "all"):
     notes.append(f"Unknown onboarding setting `{ob}`, using `off`.")
 include = [{"platform": p, "branding": b, "onboarding": m,
             "flavor": b + ("-onboarding" if m == "on" else ""),
-            "runner": platforms[p]["runner"], "arch": platforms[p]["arch"]}
+            "runner": platforms[p]["runner"], "arch": platforms[p]["arch"], "os": platforms[p]["os"]}
            for p in plats for b in brs for m in modes]
 print(f"{len(include)} build(s):", ", ".join(f"{i['platform']}/{i['flavor']}" for i in include) or "none")
 for n in notes:
