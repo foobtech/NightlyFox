@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="392" viewBox="0 0 900 392" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12">
+<rect width="900" height="392" rx="8" fill="#0d1117"/>
+<rect width="900" height="34" rx="8" fill="#161b22"/><rect y="20" width="900" height="14" fill="#161b22"/>
+<circle cx="18" cy="17" r="5" fill="#f85149"/><circle cx="38" cy="17" r="5" fill="#d29922"/><circle cx="58" cy="17" r="5" fill="#3fb950"/>
+<text x="450" y="21" fill="#8b949e" text-anchor="middle">nightlyfox@actions: branded</text>
+<text x="16" y="60" font-size="14" font-weight="bold" fill="#3fb950" xml:space="preserve">● DONE</text>
+<text x="16" y="78" fill="#8b949e" xml:space="preserve">commit 9fcf3a1690  ·  total 1h 52m 56s  ·  updated 2026-10-31 04:32:36 UTC</text>
+<text x="16" y="104" fill="#c9d1d9" xml:space="preserve"> 2:54.21 BUILDSTATUS@browser/installer END_package XZ</text>
+<text x="16" y="120" fill="#c9d1d9" xml:space="preserve"> 2:54.21 gmake[3]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/installer&#x27;</text>
+<text x="16" y="136" fill="#c9d1d9" xml:space="preserve"> 2:54.22 gmake[3]: Entering directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/locales&#x27;</text>
+<text x="16" y="152" fill="#c9d1d9" xml:space="preserve"> 2:54.22 Making langpack</text>
+<text x="16" y="168" fill="#c9d1d9" xml:space="preserve"> 2:54.22 gmake[4]: Entering directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/locales&#x27;</text>
+<text x="16" y="184" fill="#c9d1d9" xml:space="preserve"> 2:54.22 BUILDSTATUS@browser/locales START_l10n_stage --locale=en-US --manifest=../../l10n-manifest.json --…</text>
+<text x="16" y="200" fill="#c9d1d9" xml:space="preserve"> 2:54.55 BUILDSTATUS@browser/locales END_l10n_stage --locale=en-US --manifest=../../l10n-manifest.json --me…</text>
+<text x="16" y="216" fill="#c9d1d9" xml:space="preserve"> 2:54.55 gmake[4]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/locales&#x27;</text>
+<text x="16" y="232" fill="#c9d1d9" xml:space="preserve"> 2:54.56 gmake[4]: Entering directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/locales&#x27;</text>
+<text x="16" y="248" fill="#c9d1d9" xml:space="preserve"> 2:54.56 BUILDSTATUS@browser/locales START_package_langpack --locale=en-US --xpi-stage=../../dist/xpi-stage…</text>
+<text x="16" y="264" fill="#c9d1d9" xml:space="preserve"> 2:54.89 BUILDSTATUS@browser/locales END_package_langpack --locale=en-US --xpi-stage=../../dist/xpi-stage/l…</text>
+<text x="16" y="280" fill="#c9d1d9" xml:space="preserve"> 2:54.89 gmake[4]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/locales&#x27;</text>
+<text x="16" y="296" fill="#c9d1d9" xml:space="preserve"> 2:54.89 gmake[3]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/locales&#x27;</text>
+<text x="16" y="312" fill="#c9d1d9" xml:space="preserve"> 2:54.89 gmake[2]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/installer&#x27;</text>
+<text x="16" y="328" fill="#c9d1d9" xml:space="preserve"> 2:54.89 gmake[1]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/installer&#x27;</text>
+<text x="16" y="344" fill="#c9d1d9" xml:space="preserve"> 2:54.89 gmake: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj&#x27;</text>
+<text x="16" y="360" fill="#c9d1d9" xml:space="preserve"> 2:54.99 W Notification center failed: Install notify-send (usually part of the libnotify package) to get a…</text>
+<text x="16" y="376" fill="#c9d1d9" xml:space="preserve"> 2:54.99 Created package: /home/runner/work/NightlyFox/NightlyFox/src/obj/dist/firefox-161.0a1.en-US.linux-…</text>
+</svg>
