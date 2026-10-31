@@ -208,7 +208,9 @@ jobs:
           fi
           ./mach package 2>&1 | tee -a "$LOG"
           if [ "$OS" = "windows" ]; then
-            f=$(ls obj/dist/firefox-*.zip | grep -v -e crashreporter -e jsshell -e tests -e gtest | head -n1); ext="zip"
+            ls -l obj/dist/*.zip || true
+            f=$(ls obj/dist/firefox-*.zip | grep -E '\.win[0-9a-z-]*\.zip$' | head -n1); ext="zip"
+            [ -n "$f" ] || { echo "No Windows package zip found"; exit 1; }
           else
             f=$(ls obj/dist/firefox-*.tar.* | head -n1); ext="tar.${f##*.tar.}"
           fi
