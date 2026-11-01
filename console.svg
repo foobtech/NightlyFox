@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="296" viewBox="0 0 860 296">
+<style>.bg{fill:#fff;stroke:#d0d7de}.t{fill:#1f2328}.m{fill:#656d76}.lb{fill:#f6f8fa}.lg{fill:#24292f}.dv{stroke:#d8dee4}.tr{fill:#eaeef2}@media (prefers-color-scheme:dark){.bg{fill:#0d1117;stroke:#30363d}.t{fill:#e6edf3}.m{fill:#8b949e}.lb{fill:#161b22}.lg{fill:#c9d1d9}.dv{stroke:#30363d}.tr{fill:#21262d}}.s{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}.c{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}</style>
+<defs><clipPath id="cp"><rect x="0.5" y="0.5" width="859" height="295" rx="10"/></clipPath></defs>
+<rect class="bg" x="0.5" y="0.5" width="859" height="295" rx="10"/>
+<g clip-path="url(#cp)"><rect class="tr" width="860" height="4"/>
+<rect y="0" width="860" height="4" fill="#2da44e"/>
+</g>
+<text class="s t" x="24" y="38" font-size="17" font-weight="600">nightly · linux-x86_64</text>
+<rect x="780" y="21" width="56" height="24" rx="12" fill="#2da44e"/>
+<text class="s" x="808.0" y="37" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="0.5">DONE</text>
+<text class="s m" x="24" y="64" font-size="12" xml:space="preserve">commit bc1221a6f3   ·   total 1h 24m 56s   ·   updated 2026-11-01 03:53 UTC</text>
+<line class="dv" x1="24" y1="78" x2="836" y2="78"/>
+<text class="s m" x="24" y="98" font-size="10" font-weight="600" letter-spacing="1">LATEST OUTPUT</text>
+<rect class="lb" x="20" y="106" width="820" height="168" rx="6"/>
+<text class="c lg" x="32" y="126" font-size="11" xml:space="preserve"> 3:49.65 gmake[4]: Entering directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/locales&#x27;</text>
+<text class="c lg" x="32" y="141" font-size="11" xml:space="preserve"> 3:49.65 BUILDSTATUS@browser/locales START_package_langpack --locale=en-US --xpi-stage=../../dist/xpi-stage/loc…</text>
+<text class="c lg" x="32" y="156" font-size="11" xml:space="preserve"> 3:49.98 BUILDSTATUS@browser/locales END_package_langpack --locale=en-US --xpi-stage=../../dist/xpi-stage/local…</text>
+<text class="c lg" x="32" y="171" font-size="11" xml:space="preserve"> 3:49.98 gmake[4]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/locales&#x27;</text>
+<text class="c lg" x="32" y="186" font-size="11" xml:space="preserve"> 3:49.98 gmake[3]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/locales&#x27;</text>
+<text class="c lg" x="32" y="201" font-size="11" xml:space="preserve"> 3:49.98 gmake[2]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/installer&#x27;</text>
+<text class="c lg" x="32" y="216" font-size="11" xml:space="preserve"> 3:49.98 gmake[1]: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj/browser/installer&#x27;</text>
+<text class="c lg" x="32" y="231" font-size="11" xml:space="preserve"> 3:49.98 gmake: Leaving directory &#x27;/home/runner/work/NightlyFox/NightlyFox/src/obj&#x27;</text>
+<text class="c lg" x="32" y="246" font-size="11" xml:space="preserve"> 3:50.08 W Notification center failed: Install notify-send (usually part of the libnotify package) to get a not…</text>
+<text class="c lg" x="32" y="261" font-size="11" xml:space="preserve"> 3:50.08 Created package: /home/runner/work/NightlyFox/NightlyFox/src/obj/dist/firefox-161.0a1.en-US.linux-x86_…</text>
+</svg>
