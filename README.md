@@ -22,8 +22,8 @@ Without it, `unofficial` shows no welcome page, and `nightly`/`aurora` open a
 mozilla.org page. Onboarding contacts Mozilla's servers.
 
 ## Platforms
-Linux x86_64 and Linux aarch64. Windows x64 is experimental (zip only, no auto-update, off by
-default). macOS and Android are planned.
+Linux x86_64 and Linux aarch64. Windows x64 works but is off by default (no auto-update).
+macOS and Android are planned.
 
 A build runs once a day at 23:30 UTC and compiles the newest upstream commit at
 that moment, for every enabled platform and branding. Each release lists the
@@ -92,14 +92,22 @@ about 5 minutes, so what you see can lag by that much.
 </details>
 
 ## Downloading
-Releases tab -> newest `nightly-...` release -> grab the `.tar.xz` for your
-platform and branding, then:
+Releases tab -> newest `nightly-...` release -> pick the file for your platform
+and branding. Every file has a `.sha256` next to it.
 
-    tar xf NightlyFox-unofficial-linux-x86_64-<hash>.tar.xz
-    ./firefox/firefox
+**Linux**
+- `.deb` (Debian, Ubuntu, Mint...): `sudo apt install ./NightlyFox-unofficial-linux-x86_64-<hash>.deb`
+  then start it from your app menu or with `nightlyfox-unofficial`. New builds
+  are new `.deb` files; install the newer one over the old.
+- `.flatpak` (only when built with `packages=flatpak` or `all`):
+  `flatpak install --user ./NightlyFox-unofficial-linux-x86_64-<hash>.flatpak`
+- `.tar.xz` (any distro): `tar xf <file>` then `./firefox/firefox`
 
-On Windows, extract the `.zip` and run `firefox.exe`. Windows may show a
-SmartScreen warning because the build isn't signed.
+**Windows**
+- `-setup.exe`: double-click. It installs just for you (no admin) and adds a
+  Start menu entry and an uninstaller. Windows may show a SmartScreen warning
+  because the file isn't signed: click "More info", then "Run anyway".
+- `.zip`: extract and run `firefox.exe` (portable).
 
 ## Updating
 The builds check this repo's releases for updates (Settings -> General ->
